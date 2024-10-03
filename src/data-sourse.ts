@@ -17,12 +17,10 @@ export const AppDataSource = new DataSource({
 
 export const initializeDataSource = async () => {
   try {
-    console.log('fddfdfdfdfdf', process.env.DB_PASSWORD)
     await AppDataSource.initialize()
     console.log('Database connection has been established successfully!')
 
-    const result = await AppDataSource.query('SELECT NOW()')
-    console.log('Database is connected at:', result)
+    await AppDataSource.query('SELECT NOW()')
   } catch (error) {
     console.error('Data Source initialization error:', error)
     process.exit(1)
