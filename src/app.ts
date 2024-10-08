@@ -3,6 +3,7 @@ import type { Application, Request, Response } from 'express'
 import dotenv from 'dotenv'
 import { initializeDataSource } from './data-sourse'
 import { userRouter } from './modules/user/user.controller'
+import { blogRouter } from './modules/blog/blog.controller'
 
 dotenv.config()
 
@@ -13,6 +14,7 @@ initializeDataSource()
 
 app.use(express.json())
 app.use('/auth', userRouter)
+app.use('/blog', blogRouter)
 
 app.get('/', (_: Request, res: Response) => {
   res.send('Hello, This is a blog management app!')
