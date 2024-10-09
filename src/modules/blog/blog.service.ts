@@ -1,16 +1,22 @@
 import { AppDataSource } from '../../data-sourse'
 import { Blog } from '../../entities/Blog'
+import { NotFoundError } from '../../shared'
 import { BlogCreateDto } from './dtos'
 import { BlogUpdateDto } from './dtos/update-blog.dto'
 import { BlogParamsDto } from './schemas'
 
+interface CreateBlogRequest {
+  author_id: string
+  payload: BlogCreateDto
+}
+
 export class BlogService {
   private blogRepository = AppDataSource.getRepository(Blog)
 
-  async createBlog(payload: BlogCreateDto): Promise<Blog> {
+  async createBlog({ author_id, payload }: CreateBlogRequest): Promise<Blog> {
     const newBlog = new Blog()
 
-    newBlog.author_id = payload.author_id
+    newBlog.author_id = author_id
     newBlog.title = payload.title
     newBlog.content = payload.content
     newBlog.tags = payload.tags
@@ -20,7 +26,7 @@ export class BlogService {
 
   async getBlogs(searchParams: BlogParamsDto): Promise<Blog[]> {
     const page = searchParams.page || 1
-    const limit = searchParams.limit || 2
+    const limit = searchParams.limit || 10
 
     return await this.blogRepository.find({
       where: {},
@@ -35,7 +41,7 @@ export class BlogService {
     })
 
     if (!blog) {
-      return null
+      throw new NotFoundError('Blog not found')
     }
 
     return blog
@@ -45,7 +51,7 @@ export class BlogService {
     const blog = await this.getBlogById(id)
 
     if (!blog) {
-      return null
+      throw new NotFoundError('Blog not found')
     }
 
     blog.title = payload.title ? payload.title : blog.title
@@ -59,7 +65,7 @@ export class BlogService {
     const blog = await this.getBlogById(id)
 
     if (!blog) {
-      return false
+      throw new NotFoundError('Blog not found with this id')
     }
 
     const isdeleted = await this.blogRepository.delete({ id })

@@ -3,8 +3,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm'
 import bcrypt from 'bcrypt'
+import { Blog } from './Blog'
 
 // Define the role enum
 export enum UserRole {
@@ -25,6 +27,9 @@ export class User {
 
   @Column()
   password!: string
+
+  @OneToMany(() => Blog, (blog) => blog.author_id)
+  blogs?: Blog[]
 
   @Column({
     type: 'enum',

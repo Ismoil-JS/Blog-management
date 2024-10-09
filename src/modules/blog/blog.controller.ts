@@ -19,18 +19,27 @@ blogRouter.post(
   TokenParserMiddleware,
   validateReqBody(createBlogSchema),
   async (req: any, res: Response) => {
-    const { title, content, tags } = req.body
-    const { id } = req.user
+    try {
+      const { title, content, tags } = req.body
+      const { id } = req.user
 
-    await blogService.createBlog({
-      author_id: id,
-      title,
-      content,
-      tags,
-    })
-    return res.status(201).json({
-      message: 'Blog created successfully',
-    })
+      await blogService.createBlog({
+        author_id: id,
+        payload: {
+          title,
+          content,
+          tags,
+        },
+      })
+      return res.status(201).json({
+        message: 'Blog created successfully',
+      })
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error creating blog',
+        error: error.message,
+      })
+    }
   },
 )
 
@@ -38,24 +47,37 @@ blogRouter.get(
   '/',
   validateSearchParams(blogParamsDtoSchema),
   async (req: Request, res: Response) => {
-    const searchParams = req.query as unknown as BlogParamsDto
-
-    const blogs = await blogService.getBlogs(searchParams)
-    return res.status(200).json(blogs)
+    try {
+      const searchParams = req.query as unknown as BlogParamsDto
+      const blogs = await blogService.getBlogs(searchParams)
+      return res.status(200).json(blogs)
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error retrieving blogs',
+        error: error.message,
+      })
+    }
   },
 )
 
 blogRouter.get('/:id', async (req: Request, res: Response) => {
-  const { id } = req.params
+  try {
+    const { id } = req.params
+    const blog = await blogService.getBlogById(id)
 
-  const blog = await blogService.getBlogById(id)
-  if (!blog) {
-    return res.status(404).json({
-      message: 'Blog not found',
+    if (!blog) {
+      return res.status(404).json({
+        message: 'Blog not found',
+      })
+    }
+
+    return res.status(200).json(blog)
+  } catch (error: any) {
+    return res.status(500).json({
+      message: 'Error retrieving blog',
+      error: error.message,
     })
   }
-
-  return res.status(200).json(blog)
 })
 
 blogRouter.patch(
@@ -65,24 +87,31 @@ blogRouter.patch(
   BlogOwnerMiddleware,
   validateReqBody(updateBlogSchema),
   async (req: any, res: Response) => {
-    const { title, content, tags } = req.body
-    const { id } = req.params
+    try {
+      const { title, content, tags } = req.body
+      const { id } = req.params
 
-    const blog = await blogService.updateBlog(id, {
-      title,
-      content,
-      tags,
-    })
+      const blog = await blogService.updateBlog(id, {
+        title,
+        content,
+        tags,
+      })
 
-    if (!blog) {
-      return res.status(404).json({
-        message: 'Blog not found with the provided id',
+      if (!blog) {
+        return res.status(404).json({
+          message: 'Blog not found with the provided id',
+        })
+      }
+
+      return res.status(200).json({
+        message: 'Blog updated successfully',
+      })
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error updating blog',
+        error: error.message,
       })
     }
-
-    return res.status(200).json({
-      message: 'Blog updated successfully',
-    })
   },
 )
 
@@ -92,18 +121,25 @@ blogRouter.delete(
   TokenParserMiddleware,
   BlogOwnerOrAdminMiddleware,
   async (req: any, res: Response) => {
-    const { id } = req.params
+    try {
+      const { id } = req.params
 
-    const isDeleted = await blogService.deleteBlog(id)
+      const isDeleted = await blogService.deleteBlog(id)
 
-    if (!isDeleted) {
-      return res.status(404).json({
-        message: 'Blog not found with the provided id',
+      if (!isDeleted) {
+        return res.status(404).json({
+          message: 'Blog not found with the provided id',
+        })
+      }
+
+      return res.status(200).json({
+        message: 'Blog deleted successfully',
+      })
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error deleting blog',
+        error: error.message,
       })
     }
-
-    return res.status(200).json({
-      message: 'Blog deleted successfully',
-    })
   },
 )

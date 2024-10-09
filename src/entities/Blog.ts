@@ -2,15 +2,17 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import { User } from './User'
 
 @Entity()
 export class Blog {
   @PrimaryGeneratedColumn('uuid')
   id!: string
 
-  @Column()
+  @ManyToOne(() => User, (user) => user.blogs, { onDelete: 'CASCADE' })
   author_id!: string
 
   @Column()
@@ -20,7 +22,7 @@ export class Blog {
   content!: string
 
   @Column('text', { array: true })
-  tags!: string[]
+  tags?: string[]
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at!: Date
