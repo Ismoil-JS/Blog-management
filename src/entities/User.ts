@@ -7,6 +7,7 @@ import {
 } from 'typeorm'
 import bcrypt from 'bcrypt'
 import { Blog } from './Blog'
+import { Comment } from './Comment'
 
 // Define the role enum
 export enum UserRole {
@@ -30,6 +31,9 @@ export class User {
 
   @OneToMany(() => Blog, (blog) => blog.author_id)
   blogs?: Blog[]
+
+  @OneToMany(() => Comment, (comment) => comment.author_id)
+  comments?: Blog[]
 
   @Column({
     type: 'enum',

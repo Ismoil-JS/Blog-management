@@ -1,8 +1,7 @@
-import { BlogService } from '../modules'
 import { AppDataSource } from '../data-sourse'
+import { BlogService } from '../modules'
 import { Blog } from '../entities'
-import { BlogCreateDto } from '../modules'
-import { BlogUpdateDto } from '../modules'
+import { BlogCreateDto, BlogUpdateDto } from '../modules'
 import { BlogParamsDto } from '../modules'
 
 jest.mock('../data-sourse')
@@ -24,17 +23,17 @@ describe('BlogService', () => {
 
   describe('createBlog', () => {
     it('should create a new blog', async () => {
+      const author_id = '1'
       const payload: BlogCreateDto = {
-        author_id: '1',
         title: 'Test Blog',
         content: 'Test Content',
         tags: ['tag1', 'tag2'],
       }
-      const savedBlog = { id: '1', ...payload }
+      const savedBlog = { id: '1', author_id, ...payload }
 
       blogRepository.save.mockResolvedValue(savedBlog)
 
-      const result = await blogService.createBlog(payload)
+      const result = await blogService.createBlog({ author_id, payload })
 
       expect(blogRepository.save).toHaveBeenCalledWith(expect.any(Blog))
       expect(result).toEqual(savedBlog)
@@ -73,12 +72,12 @@ describe('BlogService', () => {
       expect(result).toEqual(blog)
     })
 
-    it('should return null if blog is not found', async () => {
+    it('should throw NotFoundError if blog is not found', async () => {
       blogRepository.findOne.mockResolvedValue(null)
 
-      const result = await blogService.getBlogById('999')
-
-      expect(result).toBeNull()
+      await expect(blogService.getBlogById('999')).rejects.toThrow(
+        'Blog not found',
+      )
     })
   })
 
@@ -109,12 +108,12 @@ describe('BlogService', () => {
       expect(result).toEqual({ ...blog, ...payload })
     })
 
-    it('should return null if blog is not found for updating', async () => {
+    it('should throw NotFoundError if blog is not found for updating', async () => {
       blogRepository.findOne.mockResolvedValue(null)
 
-      const result = await blogService.updateBlog('999', { title: 'New Title' })
-
-      expect(result).toBeNull()
+      await expect(
+        blogService.updateBlog('999', { title: 'New Title' }),
+      ).rejects.toThrow('Blog not found')
     })
   })
 
@@ -134,12 +133,16 @@ describe('BlogService', () => {
       expect(result).toBe(true)
     })
 
-    it('should return false if blog is not found for deletion', async () => {
+    it('should throw NotFoundError if blog is not found for deletion', async () => {
       blogRepository.findOne.mockResolvedValue(null)
 
-      const result = await blogService.deleteBlog('999')
+      await expect(blogService.deleteBlog('999')).rejects.toThrow(
+        'Blog not found',
+      )
 
-      expect(result).toBe(false)
+      expect(blogRepository.findOne).toHaveBeenCalledWith({
+        where: { id: '999' },
+      })
     })
   })
 })

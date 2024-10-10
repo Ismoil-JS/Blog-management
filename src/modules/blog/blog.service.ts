@@ -1,8 +1,7 @@
 import { AppDataSource } from '../../data-sourse'
-import { Blog } from '../../entities/Blog'
+import { Blog } from '../../entities'
 import { NotFoundError } from '../../shared'
-import { BlogCreateDto } from './dtos'
-import { BlogUpdateDto } from './dtos/update-blog.dto'
+import type { BlogCreateDto, BlogUpdateDto } from './dtos'
 import { BlogParamsDto } from './schemas'
 
 interface CreateBlogRequest {
