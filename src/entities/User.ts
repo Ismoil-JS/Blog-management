@@ -33,7 +33,7 @@ export class User {
   blogs?: Blog[]
 
   @OneToMany(() => Comment, (comment) => comment.author_id)
-  comments?: Blog[]
+  comments?: Comment[]
 
   @Column({
     type: 'enum',

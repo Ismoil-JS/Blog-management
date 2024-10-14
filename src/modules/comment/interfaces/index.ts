@@ -1,1 +1,1 @@
-export type { CreateCommentInterface } from './create-comment.interface'
+export type { CreateCommentDto } from './create-comment.interface'

@@ -5,9 +5,11 @@ import {
   IsUUID,
   TokenParserMiddleware,
   validateReqBody,
+  validateSearchParams,
 } from '../../shared'
 import { createCommentSchema } from './schemas'
 import { CommentOwnerOrAdminMiddleware } from '../../shared/middlewares/CommentOwnerOrAdmin.middleware'
+import { BlogParamsDto, blogParamsDtoSchema } from '../blog'
 
 export const commentRouter = Router()
 const commentService = new CommentService()
@@ -38,20 +40,30 @@ commentRouter.post(
   },
 )
 
-commentRouter.get('/blogs/:blog_id/comments', async (req, res) => {
-  try {
-    const { blog_id } = req.params
-    const comments = await commentService.getComments(blog_id)
+commentRouter.get(
+  '/blogs/:blog_id/comments',
+  validateSearchParams(blogParamsDtoSchema),
+  async (req, res) => {
+    try {
+      const searchParams = req.query as unknown as BlogParamsDto
+      const { blog_id } = req.params
+      const comments = await commentService.getComments({
+        blog_id,
+        searchParams,
+      })
 
-    if (!comments.length) {
-      return res.status(404).json({ message: 'No comments found on this blog' })
-    } else {
-      return res.status(200).json(comments)
+      if (!comments.length) {
+        return res
+          .status(404)
+          .json({ message: 'No comments found on this blog' })
+      } else {
+        return res.status(200).json(comments)
+      }
+    } catch (error: any) {
+      res.status(400).json({ message: error.message })
     }
-  } catch (error: any) {
-    res.status(400).json({ message: error.message })
-  }
-})
+  },
+)
 
 commentRouter.get('/comments/:id', async (req, res) => {
   try {
