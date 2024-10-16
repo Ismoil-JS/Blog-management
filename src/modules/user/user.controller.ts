@@ -1,6 +1,9 @@
 import { Router } from 'express'
 import { UserService } from './user.service'
 import {
+  AdminCheck,
+  IsUUID,
+  TokenParserMiddleware,
   checkAlreadyExists,
   generateToken,
   validateReqBody,
@@ -42,6 +45,52 @@ userRouter.post(
     } else {
       return res.status(401).json({
         message: 'Invalid email or password',
+      })
+    }
+  },
+)
+
+userRouter.put(
+  '/:id/promote',
+  TokenParserMiddleware,
+  IsUUID,
+  AdminCheck,
+  async (req, res) => {
+    try {
+      const { id } = req.params
+      const user = await userService.promoteUser(id)
+      return res.status(200).json({
+        message: 'User promoted successfully',
+        user: `User ${user.username} is now an admin`,
+        role: user.role,
+      })
+    } catch (error: any) {
+      return res.status(400).json({
+        message: 'Error occured while promoting user',
+        error: error.message,
+      })
+    }
+  },
+)
+
+userRouter.put(
+  '/:id/demote',
+  TokenParserMiddleware,
+  IsUUID,
+  AdminCheck,
+  async (req, res) => {
+    try {
+      const { id } = req.params
+      const user = await userService.demoteUser(id)
+      return res.status(200).json({
+        message: 'User demoted successfully',
+        user: `User ${user.username} is now a regular user`,
+        role: user.role,
+      })
+    } catch (error: any) {
+      return res.status(400).json({
+        message: 'Error occured while demoting user',
+        error: error.message,
       })
     }
   },
