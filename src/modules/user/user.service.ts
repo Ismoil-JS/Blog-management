@@ -1,5 +1,6 @@
 import { AppDataSource } from '../../data-sourse'
-import { User } from '../../entities/User'
+import { User, UserRole } from '../../entities/User'
+import { NotFoundError } from '../../shared'
 import { UserCreateDto, UserLoginDto } from './dtos'
 
 export class UserService {
@@ -28,5 +29,31 @@ export class UserService {
     }
 
     return user
+  }
+
+  async promoteUser(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    })
+
+    if (!user) {
+      throw new NotFoundError('User not found with the provided id')
+    }
+
+    user.role = UserRole.ADMIN
+    return await this.userRepository.save(user)
+  }
+
+  async demoteUser(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    })
+
+    if (!user) {
+      throw new NotFoundError('User not found with the provided id')
+    }
+
+    user.role = UserRole.USER
+    return await this.userRepository.save(user)
   }
 }
