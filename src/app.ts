@@ -12,7 +12,7 @@ const port = process.env.PORT || 3100
 initializeDataSource()
 
 app.use(express.json())
-app.use('/auth', userRouter)
+app.use('/users', userRouter)
 app.use('/blog', blogRouter)
 app.use(commentRouter)
 
