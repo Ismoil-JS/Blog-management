@@ -1,8 +1,8 @@
 import { AppDataSource } from '../../data-sourse'
 import { Comment } from '../../entities'
 import { NotFoundError } from '../../shared'
-import { BlogParamsDto } from '../blog'
 import { CreateCommentDto } from './interfaces'
+import { CommentParamsDto } from './interfaces/comment-params.dto'
 
 export class CommentService {
   private commentRepository = AppDataSource.getRepository(Comment)
@@ -22,7 +22,7 @@ export class CommentService {
     searchParams,
   }: {
     blog_id: string
-    searchParams: BlogParamsDto
+    searchParams: CommentParamsDto
   }): Promise<Comment[]> {
     const page = searchParams.page || 1
     const limit = searchParams.limit || 10
