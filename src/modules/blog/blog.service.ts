@@ -1,3 +1,4 @@
+import { ILike, Like } from 'typeorm'
 import { AppDataSource } from '../../data-sourse'
 import { Blog } from '../../entities'
 import { NotFoundError } from '../../shared'
@@ -26,9 +27,15 @@ export class BlogService {
   async getBlogs(searchParams: BlogParamsDto): Promise<Blog[]> {
     const page = searchParams.page || 1
     const limit = searchParams.limit || 10
+    const { title, sortBy = 'created_at', sortOrder = 'DESC' } = searchParams
 
     return await this.blogRepository.find({
-      where: {},
+      where: {
+        ...(title && { title: ILike(`%${title}%`) }),
+      },
+      order: {
+        [sortBy]: sortOrder.toUpperCase() as 'ASC' | 'DESC',
+      },
       take: limit,
       skip: (page - 1) * limit,
     })

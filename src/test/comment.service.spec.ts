@@ -25,12 +25,19 @@ describe('CommentService', () => {
   describe('getComments', () => {
     it('should return an array of comments for a given blog_id', async () => {
       const mockComments = [new Comment(), new Comment()]
+      const searchParams = { page: 1, limit: 10 }
+
       mockCommentRepository.find.mockResolvedValue(mockComments)
 
-      const result = await commentService.getComments('blog-id')
+      const result = await commentService.getComments({
+        blog_id: 'blog-id',
+        searchParams,
+      })
 
       expect(mockCommentRepository.find).toHaveBeenCalledWith({
         where: { blog_id: { id: 'blog-id' } },
+        take: 10,
+        skip: 0,
       })
       expect(result).toEqual(mockComments)
     })

@@ -3,6 +3,7 @@ import { BlogService } from '../modules'
 import { Blog } from '../entities'
 import { BlogCreateDto, BlogUpdateDto } from '../modules'
 import { BlogParamsDto } from '../modules'
+import { ILike } from 'typeorm'
 
 jest.mock('../data-sourse')
 
@@ -42,18 +43,32 @@ describe('BlogService', () => {
 
   describe('getBlogs', () => {
     it('should return a list of blogs with pagination', async () => {
-      const searchParams: BlogParamsDto = { page: 1, limit: 2 }
+      const searchParams: BlogParamsDto = {
+        page: 1,
+        limit: 2,
+        sortBy: 'created_at', // Default sortBy
+        sortOrder: 'DESC',
+        title: 'Test',
+      }
       const blogs = [{ id: '1', title: 'Test Blog' }]
 
-      blogRepository.find.mockResolvedValue(blogs)
+      blogRepository.find = jest.fn().mockResolvedValue(blogs)
 
       const result = await blogService.getBlogs(searchParams)
 
       expect(blogRepository.find).toHaveBeenCalledWith({
-        where: {},
+        where: {
+          title: ILike(`%${searchParams.title}%`),
+        },
+        order: {
+          [searchParams.sortBy]: searchParams.sortOrder.toUpperCase() as
+            | 'ASC'
+            | 'DESC',
+        },
         take: 2,
         skip: 0,
       })
+
       expect(result).toEqual(blogs)
     })
   })
