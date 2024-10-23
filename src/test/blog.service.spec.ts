@@ -50,7 +50,7 @@ describe('BlogService', () => {
         sortOrder: 'DESC',
         title: 'Test',
       }
-      const blogs = [{ id: '1', title: 'Test Blog' }]
+      const blogs = [{ id: '1', title: 'Test Blog', likes: [], likesCount: 0 }]
 
       blogRepository.find = jest.fn().mockResolvedValue(blogs)
 
@@ -67,6 +67,7 @@ describe('BlogService', () => {
         },
         take: 2,
         skip: 0,
+        relations: ['likes'],
       })
 
       expect(result).toEqual(blogs)
