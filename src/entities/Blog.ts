@@ -2,6 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -27,7 +29,11 @@ export class Blog {
   tags?: string[]
 
   @OneToMany(() => Comment, (comment) => comment.blog_id)
-  comments?: Blog[]
+  comments?: Comment[]
+
+  @ManyToMany(() => User, (user) => user.liked_blogs, { cascade: true })
+  @JoinTable()
+  likes?: User[]
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at!: Date

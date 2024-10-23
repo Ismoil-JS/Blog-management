@@ -4,6 +4,8 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  ManyToOne,
+  ManyToMany,
 } from 'typeorm'
 import bcrypt from 'bcrypt'
 import { Blog } from './Blog'
@@ -34,6 +36,9 @@ export class User {
 
   @OneToMany(() => Comment, (comment) => comment.author_id)
   comments?: Comment[]
+
+  @ManyToMany(() => Blog, (blog) => blog.likes)
+  liked_blogs?: Blog[]
 
   @Column({
     type: 'enum',

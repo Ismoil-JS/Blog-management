@@ -1,6 +1,6 @@
-import { ILike, Like } from 'typeorm'
+import { ILike } from 'typeorm'
 import { AppDataSource } from '../../data-sourse'
-import { Blog } from '../../entities'
+import { Blog, User } from '../../entities'
 import { NotFoundError } from '../../shared'
 import type { BlogCreateDto, BlogUpdateDto } from './dtos'
 import { BlogParamsDto } from './schemas'
@@ -12,6 +12,7 @@ interface CreateBlogRequest {
 
 export class BlogService {
   private blogRepository = AppDataSource.getRepository(Blog)
+  private userRepository = AppDataSource.getRepository(User)
 
   async createBlog({ author_id, payload }: CreateBlogRequest): Promise<Blog> {
     const newBlog = new Blog()
@@ -24,12 +25,12 @@ export class BlogService {
     return await this.blogRepository.save(newBlog)
   }
 
-  async getBlogs(searchParams: BlogParamsDto): Promise<Blog[]> {
+  async getBlogs(searchParams: BlogParamsDto): Promise<any> {
     const page = searchParams.page || 1
     const limit = searchParams.limit || 10
     const { title, sortBy = 'created_at', sortOrder = 'DESC' } = searchParams
 
-    return await this.blogRepository.find({
+    const blogs = await this.blogRepository.find({
       where: {
         ...(title && { title: ILike(`%${title}%`) }),
       },
@@ -38,7 +39,14 @@ export class BlogService {
       },
       take: limit,
       skip: (page - 1) * limit,
+      relations: ['likes'],
     })
+
+    return blogs.map((blog) => ({
+      ...blog,
+      likes: blog.likes ? blog.likes.map((user) => user.id) : [],
+      likesCount: blog.likes ? blog.likes.length : 0,
+    }))
   }
 
   async getBlogById(id: string): Promise<Blog | null> {
@@ -81,5 +89,35 @@ export class BlogService {
     } else {
       return false
     }
+  }
+
+  async likeBlog(id: string, userId: string): Promise<Blog | null> {
+    const blog = await this.blogRepository.findOne({
+      where: { id },
+      relations: ['likes'],
+    })
+
+    if (!blog) {
+      throw new NotFoundError('Blog not found with the provided id')
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } })
+    if (!user) {
+      throw new NotFoundError('User not found with the provided id')
+    }
+
+    const userAlreadyLiked =
+      blog.likes && blog.likes.some((likedUser) => likedUser.id === user.id)
+
+    if (userAlreadyLiked) {
+      blog.likes =
+        blog.likes && blog.likes.filter((likedUser) => likedUser.id !== user.id)
+    } else {
+      blog.likes && blog.likes.push(user)
+    }
+
+    await this.blogRepository.save(blog)
+
+    return blog
   }
 }
