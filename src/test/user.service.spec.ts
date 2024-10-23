@@ -128,8 +128,8 @@ describe('UserService', () => {
 
       userService['userRepository'].findOne = jest
         .fn()
-        .mockResolvedValueOnce(mockUser) // First call for finding user
-        .mockResolvedValueOnce(null) // Second call for checking if email exists
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null)
 
       userService['userRepository'].save = jest.fn().mockResolvedValue({
         ...mockUser,
@@ -183,8 +183,8 @@ describe('UserService', () => {
 
       userService['userRepository'].findOne = jest
         .fn()
-        .mockResolvedValueOnce(mockUser) // First call for finding user
-        .mockResolvedValueOnce(existingUserWithSameEmail) // Second call for checking if email exists
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(existingUserWithSameEmail)
 
       await expect(
         userService.updateProfile('1', payload),
