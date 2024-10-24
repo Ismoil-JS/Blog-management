@@ -143,3 +143,26 @@ blogRouter.delete(
     }
   },
 )
+
+blogRouter.patch(
+  '/:id/like',
+  IsUUID,
+  TokenParserMiddleware,
+  async (req: any, res: Response) => {
+    try {
+      const { id } = req.params
+      const { id: user_id } = req.user
+
+      await blogService.likeBlog(id, user_id)
+
+      return res.status(200).json({
+        message: 'Blog liked/disliked successfully',
+      })
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error liking blog',
+        error: error.message,
+      })
+    }
+  },
+)
