@@ -74,9 +74,6 @@ export class UserService {
       where: { id },
     })
 
-    console.log(user, 'user')
-    console.log(payload, 'payload')
-
     const userWithSameEmail = payload.email
       ? await this.userRepository.findOne({
           where: { email: payload.email && payload.email },
@@ -92,5 +89,9 @@ export class UserService {
     user.username = payload.username
     user.email = payload.email
     return await this.userRepository.save(user)
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await this.userRepository.find()
   }
 }
