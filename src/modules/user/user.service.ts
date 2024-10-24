@@ -1,5 +1,5 @@
 import { AppDataSource } from '../../data-sourse'
-import { User, UserRole } from '../../entities/User'
+import { User, UserRole } from '../../entities'
 import { NotFoundError } from '../../shared'
 import { UserCreateDto, UserLoginDto } from './dtos'
 
@@ -55,5 +55,43 @@ export class UserService {
 
     user.role = UserRole.USER
     return await this.userRepository.save(user)
+  }
+
+  async getProfile(id: string): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    })
+
+    if (!user) {
+      throw new NotFoundError('User not found with the provided id')
+    }
+
+    return user
+  }
+
+  async updateProfile(id: string, payload: UserCreateDto): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    })
+
+    const userWithSameEmail = payload.email
+      ? await this.userRepository.findOne({
+          where: { email: payload.email && payload.email },
+        })
+      : false
+
+    if (!user) {
+      throw new NotFoundError('User not found with the provided id')
+    } else if (userWithSameEmail) {
+      throw new Error('User with this email already exists')
+    }
+
+    user.username = payload.username
+    user.email = payload.email
+    return await this.userRepository.save(user)
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    return await this.userRepository.find()
   }
 }

@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Response, Router } from 'express'
 import { UserService } from './user.service'
 import {
   AdminCheck,
@@ -95,3 +95,68 @@ userRouter.put(
     }
   },
 )
+
+userRouter.get('/:id', IsUUID, async (req: any, res: Response) => {
+  try {
+    const { id } = req.params
+
+    const user = await userService.getProfile(id)
+    return res.status(200).json({
+      message: 'User profile fetched successfully',
+      user,
+    })
+  } catch (error: any) {
+    return res.status(400).json({
+      message: 'Error occured while fetching user profile',
+      error: error.message,
+    })
+  }
+})
+
+userRouter.patch(
+  '/:id',
+  TokenParserMiddleware,
+  IsUUID,
+  async (req: any, res: Response) => {
+    try {
+      const { id } = req.params
+      const { id: user_id } = req.user
+      if (id !== user_id) {
+        return res.status(401).json({
+          message: 'You are not authorized to update this user profile',
+        })
+      } else {
+        const user = await userService.updateProfile(id, req.body)
+
+        return res.status(200).json({
+          message: 'User profile updated successfully',
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+          },
+        })
+      }
+    } catch (error: any) {
+      return res.status(400).json({
+        message: 'Error occured while updating user profile',
+        error: error.message,
+      })
+    }
+  },
+)
+
+userRouter.get('/', async (req, res) => {
+  try {
+    const users = await userService.getAllUsers()
+    return res.status(200).json({
+      message: 'Users fetched successfully',
+      users,
+    })
+  } catch (error: any) {
+    return res.status(400).json({
+      message: 'Error occured while fetching users',
+      error: error.message,
+    })
+  }
+})
