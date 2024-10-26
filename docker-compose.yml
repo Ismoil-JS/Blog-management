@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: express_app
+    ports:
+      - '3100:3100'
+    environment:
+      - NODE_ENV=production
+      - PORT=3100
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=#Ismoil1705
+      - DB_NAME=blogmanagement
+      - JWT_SECRET=blogmanagement
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    container_name: postgres_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=#Ismoil1705
+      - POSTGRES_DB=blogmanagement
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
